@@ -54,10 +54,7 @@ ou: users
 dn: cn=user,ou=groups,dc=homelab
 changetype: add
 cn: user
-description:: RXN0ZSBncnVwbyDDqSBuZWNlc3PDoXJpbyBwb3JxdWUgdG9kbyB1c3XDoXJpby
- BwcmVjaXNhIGVzdGFyIGFzc29jaWFkbyBhIHVtIHBvc2l4R3JvdXAuIE9zIGRlbWFpcyBncnVwb
- 3MgbsOjbyBzw6NvIGRlc3RlIHRpcG8gcGFyYSBwb2RlciB0ZXIgbyBhdHJpYnV0byBNZW1iZXJP
- Zi4=
+description:: ????
 gidnumber: 500
 objectclass: posixGroup
 objectclass: top
