@@ -1,0 +1,112 @@
+version: "3.7"
+
+services:
+  openldap:
+    image: registry.libraries.homelab/osixia/openldap:latest
+    container_name: openldap
+    restart: always
+    tty: true
+    stdin_open: true
+    volumes:
+      - ${ETC_LOCALTIME}:/etc/localtime:ro
+      - ldap-config:/etc/ldap/slapd.d
+      - ldap-data:/var/lib/ldap
+      - ./init/groups-users.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/groups-users.ldif
+      - ./backup:/data/backup
+    networks:
+      - net-ldap
+    secrets:
+      - admin_password
+      - config_password
+      - readonly_user_password
+    environment:
+      LDAP_ORGANISATION: "Docker Dev-Stack."
+      LDAP_DOMAIN: "homelab"
+      LDAP_BASE_DN: "dc=homelab"
+      LDAP_ADMIN_PASSWORD_FILE: "/run/secrets/admin_password"
+      LDAP_CONFIG_PASSWORD_FILE: "/run/secrets/config_password"
+      LDAP_READONLY_USER: "true"
+      LDAP_READONLY_USER_USERNAME: "ldap-reader"
+      LDAP_READONLY_USER_PASSWORD_FILE: "/run/secrets/readonly_user_password"
+      LDAP_RFC2307BIS_SCHEMA: "false"
+      LDAP_BACKEND: "mdb"
+      LDAP_TLS: "false"
+      LDAP_TLS_ENFORCE: "false"
+      LDAP_TLS_CIPHER_SUITE: "SECURE256:-VERS-SSL3.0"
+      LDAP_TLS_PROTOCOL_MIN: "3.1"
+      LDAP_TLS_VERIFY_CLIENT: "demand"
+      LDAP_REPLICATION: "false"
+      KEEP_EXISTING_CONFIG: "false"
+      LDAP_REMOVE_CONFIG_AFTER_SETUP: "false"
+      LDAP_SSL_HELPER_PREFIX: "ldap"
+    command:
+      - "--loglevel=info" #"-l=debug"
+      - "--copy-service"
+    labels:
+      - traefik.enable=false
+
+#   healthcheck:
+#     test: ldapwhoami -xH ldapi:// || exit 1
+#     start_period: 5s #default: 0s
+#     interval: 1m #default: 30s
+#     timeout: 5s #default: 30s
+#     retries: 5 #default: 3
+
+  phpldapadmin:
+    image: registry.libraries.homelab/osixia/phpldapadmin:latest
+    container_name: phpldapadmin
+    restart: always
+    volumes:
+      - ${ETC_LOCALTIME}:/etc/localtime:ro
+      - phpadmin-data:/var/www/phpldapadmin
+    networks:
+      - net-proxy
+      - net-ldap
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: "openldap"
+      PHPLDAPADMIN_HTTPS: "false"
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=net-proxy
+      - traefik.frontend.rule=Host:ldap.homelab
+      - traefik.frontend.passHostHeader=true
+      - traefik.frontend.headers.SSLRedirect=true
+      - traefik.frontend.headers.forceSTSHeader=true
+      - traefik.frontend.headers.STSSeconds=315360000
+      - traefik.frontend.headers.STSIncludeSubdomains=true
+      - traefik.frontend.headers.STSPreload=true
+      - traefik.frontend.headers.browserXSSFilter=true
+      - traefik.frontend.headers.contentTypeNosniff=true
+      - traefik.backend=phpldapadmin
+      - traefik.port=80
+    depends_on:
+      - openldap
+
+#   healthcheck:
+#     test: curl --fail -s http://localhost/ || exit 1
+#     start_period: 0s #default: 0s
+#     interval: 1m #default: 30s
+#     timeout: 5s #default: 30s
+#     retries: 5 #default: 3
+
+volumes:
+  ldap-data:
+    external: true
+  ldap-config:
+    external: true
+  phpadmin-data:
+    external: true
+    
+networks:
+  net-proxy:
+    external: true
+  net-ldap:
+    external: true
+
+secrets:
+  admin_password:
+    file: ./secrets/admin_password.txt
+  config_password:
+    file: ./secrets/config_password.txt
+  readonly_user_password:
+    file: ./secrets/readonly_user_password.txt
