@@ -59,8 +59,8 @@ gidnumber: 500
 objectclass: posixGroup
 objectclass: top
 
-# Entry 13: cn=Luciano Sampaio Martins de Souza,ou=users,dc=docker,dc=...
-dn: cn=Luciano Sampaio Martins de Souza,ou=users,dc=homelab
+# Entry 13: cn=Luciano,ou=users,dc=docker,dc=...
+dn: cn=Luciano,ou=users,dc=homelab
 changetype: add
 cn: Luciano 
 gidnumber: 500
