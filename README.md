@@ -66,10 +66,10 @@ cn=ldap-reader,dc=homelab
 
 1. [Import / Export ldap database.](http://vaab.blog.kal.fr/2010/03/10/import-export-ldap-database "Import / Export ldap database")
 
-## License:
+### License:
 
 [MIT](LICENSE "MIT License")
 
-## Created by: 
+### Created by:
 
 1. Luciano Sampaio.
